@@ -28,9 +28,9 @@ if archivo:
     
     # Filtro de efectividad (ajustado a tu lógica de 'Causa Ajena' o 'Efectividad')
     # Nota: Aquí puedes cambiar 'Causa Ajena' por el término que uses para entregas exitosas
-    efectivos = df[df['K'].str.contains('entregado', na=False, case=False)]
+    efectivos = df[df['L'].str.contains('entregado', na=False, case=False)]
     exitos_counts = efectivos['H'].value_counts().reset_index()
-    exitos_counts.columns = ['Repartidor', 'Entregas_Exitosas']
+    exitos_counts.columns = ['Repartidor', 'Entregado_Exitosas']
     
     # Unir datos para el gráfico comparativo
     resumen_repartidores = pd.merge(repartidor_counts, exitos_counts, on='Repartidor', how='left').fillna(0)
