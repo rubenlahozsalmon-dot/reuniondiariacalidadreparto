@@ -34,7 +34,7 @@ if archivo:
     
     # Unir datos para el gráfico comparativo
     resumen_repartidores = pd.merge(repartidor_counts, exitos_counts, on='Repartidor', how='left').fillna(0)
-    resumen_repartidores['Efectividad_%'] = (resumen_repartidores['Entregas_Exitosas'] / resumen_repartidores['Total_Envios'] * 100).round(2)
+    resumen_repartidores['Efectividad_%'] = (resumen_repartidores['entregado_Exitosas'] / resumen_repartidores['Total_Envios'] * 100).round(2)
 
     # --- VISUALIZACIÓN ---
     
