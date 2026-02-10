@@ -4,79 +4,72 @@ import plotly.express as px
 import string
 
 # --- CONFIGURACIÓN DE LA PÁGINA ---
-st.set_page_config(page_title="Auditoría Logística Last Mile", layout="wide")
+st.set_page_config(page_title="Auditoría Logística Pro", layout="wide")
 
-st.title("📦 Panel de Control de Calidad de Reparto")
-st.markdown("Sube el reporte de entregas para analizar el desempeño de los repartidores.")
+st.title("📦 Panel de Control: Entregado vs Efectividad")
+st.markdown("Esta versión busca automáticamente tanto 'Entregado' como 'Efectividad' para no perder datos.")
 
 # --- 1. CARGA DE DATOS ---
-archivo = st.sidebar.file_uploader("Sube tu archivo Excel (.xlsx)", type=['xlsx'])
+archivo = st.sidebar.file_uploader("Sube tu reporte Excel (.xlsx)", type=['xlsx'])
 
 if archivo:
-    # Definimos nombres de columnas estándar (A-Q) para evitar errores de nombres cambiantes
+    # Definimos nombres de columnas estándar (A-Q)
     column_names = list(string.ascii_uppercase[:17])
     
     try:
-        # Leemos el archivo cargado directamente
         df = pd.read_excel(archivo, names=column_names, header=0)
         
-        # --- 2. PROCESAMIENTO ---
-        # H=Repartidor | L=Estado (donde buscamos 'entregado') | O=CP
+        # --- 2. PROCESAMIENTO CON DOBLE VALIDACIÓN ---
+        # H=Repartidor | L=Estado | O=CP
         
         # Conteo total de envíos por repartidor
         repartidor_counts = df['H'].value_counts().reset_index()
         repartidor_counts.columns = ['Repartidor', 'Total_Envios']
         
-        # Filtrado de éxitos: buscamos la palabra 'entregado' en la columna L
-        # Usamos case=False para que no importe si es 'Entregado' o 'ENTREGADO'
-        efectivos = df[df['L'].astype(str).str.contains('entregado', na=False, case=False)]
+        # LÓGICA CLAVE: Filtramos si contiene 'entregado' O 'efectividad'
+        # Usamos el operador '|' que significa "O" en programación
+        condicion_exito = (
+            df['L'].astype(str).str.contains('entregado', na=False, case=False) | 
+            df['L'].astype(str).str.contains('efectividad', na=False, case=False)
+        )
+        
+        efectivos = df[condicion_exito]
         
         exitos_counts = efectivos['H'].value_counts().reset_index()
-        exitos_counts.columns = ['Repartidor', 'Entregas_Exitosas'] # <--- Nombre unificado
+        exitos_counts.columns = ['Repartidor', 'Entregas_Exitosas']
         
-        # Unión de datos (Merge)
+        # Unión de datos
         resumen_repartidores = pd.merge(repartidor_counts, exitos_counts, on='Repartidor', how='left').fillna(0)
         
-        # --- CORRECCIÓN LÍNEA 37 ---
-        # Calculamos el % de efectividad usando el nombre unificado
+        # Cálculo de Efectividad %
         resumen_repartidores['Efectividad_%'] = (resumen_repartidores['Entregas_Exitosas'] / resumen_repartidores['Total_Envios'] * 100).round(2)
         
         # --- 3. VISUALIZACIÓN ---
         
-        # Métricas rápidas en la parte superior
         m1, m2, m3 = st.columns(3)
         m1.metric("Total Pedidos", len(df))
-        m2.metric("Entregas Exitosas", int(resumen_repartidores['Entregas_Exitosas'].sum()))
+        m2.metric("Éxitos (Entregado/Efectividad)", int(resumen_repartidores['Entregas_Exitosas'].sum()))
         m3.metric("Efectividad Global", f"{resumen_repartidores['Efectividad_%'].mean():.1f}%")
         
         st.divider()
         
-        # Gráfico Comparativo de Repartidores
-        st.subheader("🏎️ Rendimiento por Repartidor")
+        # Gráfico de Desempeño
+        st.subheader("🏎️ Comparativa de Repartidores")
         fig_repa = px.bar(
             resumen_repartidores.sort_values('Total_Envios', ascending=False), 
             x='Repartidor', 
             y=['Total_Envios', 'Entregas_Exitosas'],
             barmode='group',
-            labels={'value': 'Cantidad de Paquetes', 'variable': 'Estado'},
-            color_discrete_map={'Total_Envios': '#1f77b4', 'Entregas_Exitosas': '#2ca02c'}
+            color_discrete_map={'Total_Envios': '#3498db', 'Entregas_Exitosas': '#2ecc71'},
+            text_auto='.2s'
         )
         st.plotly_chart(fig_repa, use_container_width=True)
-        
-        # Distribución por Código Postal
-        st.subheader("📍 Concentración por Código Postal (Top 15)")
-        cp_data = df['O'].value_counts().head(15).reset_index()
-        cp_data.columns = ['CP', 'Pedidos']
-        fig_cp = px.pie(cp_data, values='Pedidos', names='CP', hole=0.3)
-        st.plotly_chart(fig_cp, use_container_width=True)
-        
-        # Tabla detallada
-        st.subheader("📋 Detalle de Auditoría")
+
+        # Tabla de Ranking
+        st.subheader("📋 Ranking de Calidad")
         st.dataframe(resumen_repartidores.sort_values('Efectividad_%', ascending=False), use_container_width=True)
 
     except Exception as e:
-        st.error(f"Hubo un error al procesar el archivo: {e}")
-        st.info("Asegúrate de que el Excel tenga el formato de columnas esperado.")
-
+        st.error(f"Error técnico: {e}")
 else:
-    st.info("👋 Por favor, carga un archivo Excel en la barra lateral para comenzar el análisis.")
+    st.info("👋 Esperando archivo Excel...")
