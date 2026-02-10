@@ -28,7 +28,7 @@ if archivo:
     
     # Filtro de efectividad (ajustado a tu lógica de 'Causa Ajena' o 'Efectividad')
     # Nota: Aquí puedes cambiar 'Causa Ajena' por el término que uses para entregas exitosas
-    efectivos = df[df['K'].str.contains('Causa Ajena', na=False, case=False)]
+    efectivos = df[df['K'].str.contains('entregado', na=False, case=False)]
     exitos_counts = efectivos['H'].value_counts().reset_index()
     exitos_counts.columns = ['Repartidor', 'Entregas_Exitosas']
     
