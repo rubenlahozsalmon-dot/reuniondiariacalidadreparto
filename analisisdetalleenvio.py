@@ -65,4 +65,18 @@ if archivo:
         
         # Distribución por Código Postal
         st.subheader("📍 Concentración por Código Postal (Top 15)")
-        cp_data = df['O
+        cp_data = df['O'].value_counts().head(15).reset_index()
+        cp_data.columns = ['CP', 'Pedidos']
+        fig_cp = px.pie(cp_data, values='Pedidos', names='CP', hole=0.3)
+        st.plotly_chart(fig_cp, use_container_width=True)
+        
+        # Tabla detallada
+        st.subheader("📋 Detalle de Auditoría")
+        st.dataframe(resumen_repartidores.sort_values('Efectividad_%', ascending=False), use_container_width=True)
+
+    except Exception as e:
+        st.error(f"Hubo un error al procesar el archivo: {e}")
+        st.info("Asegúrate de que el Excel tenga el formato de columnas esperado.")
+
+else:
+    st.info("👋 Por favor, carga un archivo Excel en la barra lateral para comenzar el análisis.")
