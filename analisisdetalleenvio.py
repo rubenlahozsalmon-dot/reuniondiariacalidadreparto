@@ -27,7 +27,7 @@ if archivo:
     repartidor_counts.columns = ['Repartidor', 'Total_Envios']
     
     # Filtro de efectividad (ajustado a tu lógica de 'Causa Ajena' o 'Efectividad')
-    # Nota: Aquí puedes cambiar 'Causa Ajena' por el término que uses para entregas exitosas
+    # Nota: Aquí puedes cambiar 'Causa Ajena' por el término que uses para entregado exitosas
     efectivos = df[df['L'].str.contains('entregado', na=False, case=False)]
     exitos_counts = efectivos['H'].value_counts().reset_index()
     exitos_counts.columns = ['Repartidor', 'Entregado_Exitosas']
@@ -51,10 +51,10 @@ if archivo:
     fig_comp = px.bar(
         resumen_repartidores, 
         x='Repartidor', 
-        y=['Total_Envios', 'Entregas_Exitosas'],
+        y=['Total_Envios', 'Entregado_Exitosas'],
         barmode='group',
-        color_discrete_map={'Total_Envios': '#636EFA', 'Entregas_Exitosas': '#00CC96'},
-        title="Volumen vs Entregas Exitosas"
+        color_discrete_map={'Total_Envios': '#636EFA', 'Entregado_Exitosas': '#00CC96'},
+        title="Volumen vs Entregado Exitosas"
     )
     st.plotly_chart(fig_comp, use_container_width=True)
 
