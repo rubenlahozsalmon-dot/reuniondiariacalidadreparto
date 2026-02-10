@@ -5,7 +5,7 @@ import string
 
 # 1. Cargar Datos
 column_names = list(string.ascii_uppercase[:17])
-df = pd.read_excel('/content/detalle_envio.xlsx', names=column_names, header=0)
+df = pd.read_excel('/st.file_uploader', names=column_names, header=0)
 
 # 2. Análisis de Repartidores (Mayores/Menores Entregas)
 effective_filter = 'Causa Ajena'
